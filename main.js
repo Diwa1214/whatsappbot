@@ -51,7 +51,7 @@ app.post('/webhook', async function(req,res){
                     "to":from,
                     "type":"template",
                     "template":{
-                        "name":"welcome_bot",
+                        "name":"hello_world",
                         "language":{
                             "code":"en_US"
                         }
