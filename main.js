@@ -1,5 +1,6 @@
 const express = require("express")
 require('dotenv').config()
+const axios = require('axios');
 
 const app = express()
 
@@ -26,9 +27,31 @@ app.get('/webhook',function(req,res){
   }
 })
 
-app.post('/webhook',function(req,res){
+app.post('/webhook', async function(req,res){
     const body_params = JSON.stringify(req.body) 
-    console.log(body_params,"hai")
+    if(body_params?.object && body_params?.entry){
+         if(body_params.entry[0].changes && body_params.entry[0].changes[0] && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0] ){
+
+            let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
+            let from  = body_params.entry[0].changes[0].value.messages[0].from
+            let body = body_params.entry[0].changes[0].value.messages[0].text.body
+
+            
+            let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
+
+            console.log(phone_no_id,from,body,url,"server_log");
+            if(body == "Hai" ){
+                await  axios.post(url,{
+                    "messaging_product": "whatsapp",
+                    "to":from,
+                    "text":{
+                        "body":"Hi I am whatsapp bot"
+                    }
+                })
+            }
+
+         }
+    }
 
 })
 
