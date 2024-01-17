@@ -43,12 +43,18 @@ app.post('/webhook', async function(req,res){
             
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
+            console.log(body,"body");
+
            if(body == "Hai"){
                 await axios.post(url,{
                     "messaging_product": "whatsapp",
                     "to":from,
-                    "text":{
-                        "body":"Hi I am calendar bokking bot"
+                    "type":"template",
+                    "template":{
+                        "name":"welcome_bot",
+                        "language":{
+                            "code":"en_US"
+                        }
                     }
                 })
                 res.status(200).send("success")
