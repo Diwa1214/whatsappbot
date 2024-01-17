@@ -30,11 +30,12 @@ app.get('/webhook',function(req,res){
 app.post('/webhook', async function(req,res){
     const body_params = JSON.stringify(req.body) 
     console.log(body_params,"params");
-    if(body_params.object && body_params.entry){
-         console.log("1");
-         if(body_params.entry[0].changes && body_params.entry[0].changes[0] && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0] ){
-            console.log("2");
+    console.log(body_params.object, "exists");
 
+    if(body_params.object){
+        console.log("1",body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]);
+
+        if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]){
             let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
             let from  = body_params.entry[0].changes[0].value.messages[0].from
             let body = body_params.entry[0].changes[0].value.messages[0].text.body
@@ -43,9 +44,7 @@ app.post('/webhook', async function(req,res){
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
             console.log(phone_no_id,from,body,url,"server_log");
-            
-
-         }
+        }
     }
 
 })
