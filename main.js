@@ -1,8 +1,11 @@
 const express = require("express")
+require('dotenv').config()
 
 const app = express()
 
 app.use(express.json())
+
+console.log(process.env.WHATSAPP_TOKEN,process.env.PORT);
 
 
 app.get('/webhook',function(req,res){
@@ -11,7 +14,7 @@ app.get('/webhook',function(req,res){
   const challenges = req.query['hub.challenge']
   const verify_token = req.query['hub.verify_token']
 
-  const WHATSAPP_TOKEN ='whatsappBot'
+  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN 
 
   if(mode && challenges){
       if(WHATSAPP_TOKEN == verify_token){
@@ -33,6 +36,6 @@ app.get("/",function(req,res){
     res.send("Whatsapp server")
 })
 
-app.listen(5000,()=>{
+app.listen(process.env.PORT,()=>{
     console.log("Whatsapp server is running on port 5000")
 })
