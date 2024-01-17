@@ -40,15 +40,7 @@ app.post('/webhook', async function(req,res){
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
             console.log(phone_no_id,from,body,url,"server_log");
-            if(body == "Hai" ){
-                await  axios.post(url,{
-                    "messaging_product": "whatsapp",
-                    "to":from,
-                    "text":{
-                        "body":"Hi I am whatsapp bot"
-                    }
-                })
-            }
+            
 
          }
     }
