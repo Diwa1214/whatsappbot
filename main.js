@@ -33,7 +33,7 @@ app.post('/webhook', async function(req,res){
     console.log(body_params.object, "exists");
 
     if(body_params.object){
-        console.log("1",body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]);
+
 
         if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]){
             let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
@@ -43,7 +43,20 @@ app.post('/webhook', async function(req,res){
             
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
-            console.log(phone_no_id,from,body,url,"server_log");
+           if(body == "Hai"){
+                await axios.post(url,{
+                    "messaging_product": "whatsapp",
+                    "to":from,
+                    "text":{
+                        "body":"Hi I am calendar bokking bot"
+                    }
+                })
+                res.status(200).send("success")
+           }
+           else{
+              res.status(403).send("failure")
+           }
+
         }
     }
 
