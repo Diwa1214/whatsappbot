@@ -30,7 +30,9 @@ app.get('/webhook',function(req,res){
 app.post('/webhook', async function(req,res){
     const body_params = JSON.stringify(req.body) 
     if(body_params?.object && body_params?.entry){
+         console.log("1");
          if(body_params.entry[0].changes && body_params.entry[0].changes[0] && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0] ){
+            console.log("2");
 
             let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
             let from  = body_params.entry[0].changes[0].value.messages[0].from
