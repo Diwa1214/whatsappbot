@@ -42,22 +42,24 @@ app.post('/webhook', async function(req,res){
             
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
-            // console.log(body,"body");
+            let option ={
+                url,
+                phone_no_id,
+                from,
+                body
+            }
 
            if(body == "Hai"){
-                await axios.post(url,{
-                    "messaging_product": "whatsapp",
-                    "to":from,
-                    "type":"template",
-                    "template":{
-                        "name":"hello_world",
-                        "language":{
-                            "code":"en_US"
-                        }
-                    }
-                })
-                res.status(200).send("success")
+               initalTemplate(option)
            }
+
+           else if(body == "Can you book me a time today that is available?"){
+              confirmationTemplate(option)
+           }
+           else if(body == "Yes" || body == "yes"){
+              thanksTemplate(option)
+           }
+
            else{
               res.status(403).send("failure")
            }
@@ -66,6 +68,58 @@ app.post('/webhook', async function(req,res){
     }
 
 })
+
+ async function initalTemplate(option){
+    let url = option['url']
+    let from = option['from']
+    await axios.post(url,{
+        "messaging_product": "whatsapp",
+        "to":from,
+        "type":"template",
+        "template":{
+            "name":"welcome_message",
+            "language":{
+                "code":"en_US"
+            }
+        }
+    })
+    res.status(200).send("success")
+}
+
+async function confirmationTemplate(option){
+    let url = option['url']
+    let from = option['from']
+    await axios.post(url,{
+        "messaging_product": "whatsapp",
+        "to":from,
+        "type":"template",
+        "template":{
+            "name":"confirm_text",
+            "language":{
+                "code":"en_US"
+            }
+        }
+    })
+    res.status(200).send("success")
+}
+
+async function thanksTemplate(option){
+    let url = option['url']
+    let from = option['from']
+    await axios.post(url,{
+        "messaging_product": "whatsapp",
+        "to":from,
+        "type":"template",
+        "template":{
+            "name":"thanks_message",
+            "language":{
+                "code":"en_US"
+            }
+        }
+    })
+    res.status(200).send("success")
+}
+
 
 app.get("/",function(req,res){
     res.send("Whatsapp server")
