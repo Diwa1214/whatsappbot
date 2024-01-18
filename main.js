@@ -57,7 +57,7 @@ app.post('/webhook', async function(req,res){
                     "template":{
                         "name":"welcome_message",
                         "language":{
-                            "code":"en_US"
+                            "code":"en"
                         }
                     }
                 })
@@ -72,7 +72,7 @@ app.post('/webhook', async function(req,res){
                     "template":{
                         "name":"confirm_text",
                         "language":{
-                            "code":"en_US"
+                            "code":"en"
                         }
                     }
                 })
@@ -86,7 +86,7 @@ app.post('/webhook', async function(req,res){
                     "template":{
                         "name":"thanks_message",
                         "language":{
-                            "code":"en_US"
+                            "code":"en"
                         }
                     }
                 })
