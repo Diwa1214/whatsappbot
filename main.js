@@ -50,14 +50,47 @@ app.post('/webhook', async function(req,res){
             }
 
            if(body == "Hai"){
-               initalTemplate(option)
+                await axios.post(url,{
+                    "messaging_product": "whatsapp",
+                    "to":from,
+                    "type":"template",
+                    "template":{
+                        "name":"welcome_message",
+                        "language":{
+                            "code":"en_US"
+                        }
+                    }
+                })
+                res.status(200).send("success")
            }
 
            else if(body == "Can you book me a time today that is available?"){
-              confirmationTemplate(option)
+                await axios.post(url,{
+                    "messaging_product": "whatsapp",
+                    "to":from,
+                    "type":"template",
+                    "template":{
+                        "name":"confirm_text",
+                        "language":{
+                            "code":"en_US"
+                        }
+                    }
+                })
+                res.status(200).send("success")
            }
            else if(body == "Yes" || body == "yes"){
-              thanksTemplate(option)
+                await axios.post(url,{
+                    "messaging_product": "whatsapp",
+                    "to":from,
+                    "type":"template",
+                    "template":{
+                        "name":"thanks_message",
+                        "language":{
+                            "code":"en_US"
+                        }
+                    }
+                })
+                res.status(200).send("success")
            }
 
            else{
