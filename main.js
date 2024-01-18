@@ -1,6 +1,9 @@
 const express = require("express")
 require('dotenv').config()
 const axios = require('axios');
+const event = require('./src/events/event') 
+const auth  = require('./auth/auth')
+
 
 const app = express()
 
@@ -37,7 +40,13 @@ app.post('/webhook', async function(req,res){
         if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]){
             let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
             let from  = body_params.entry[0].changes[0].value.messages[0].from
-            let body = body_params.entry[0].changes[0].value.messages[0].text.body
+            let body = ''
+            if(body_params.entry[0].changes[0].value.messages[0].type = "text"){
+                 body = body_params.entry[0].changes[0].value.messages[0].text.body
+            }
+            else if(body_params.entry[0].changes[0].value.messages[0].type = "button"){
+                body = body_params.entry[0].changes[0].value.messages[0].button.text
+            }
 
             
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
@@ -79,18 +88,8 @@ app.post('/webhook', async function(req,res){
                 res.status(200).send("success")
            }
            else if(body == "Yes" || body == "yes"){
-                await axios.post(url,{
-                    "messaging_product": "whatsapp",
-                    "to":from,
-                    "type":"template",
-                    "template":{
-                        "name":"thanks_message",
-                        "language":{
-                            "code":"en"
-                        }
-                    }
-                })
-                res.status(200).send("success")
+                let eventCreated = await auth.authorize().then(event.createEvent).catch(console.error);
+                return res.send(eventCreated)
            }
 
            else{
