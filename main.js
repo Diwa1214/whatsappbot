@@ -3,13 +3,17 @@ require('dotenv').config()
 const axios = require('axios');
 const event = require('./src/events/event') 
 const auth  = require('./auth/auth')
-
+const { google } = require('googleapis');
+const { OAuth2Client } = require('google-auth-library');
 
 const app = express()
 
 app.use(express.json())
 
-console.log(process.env.WHATSAPP_TOKEN,process.env.PORT);
+const now = new Date();
+const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // One hour later
+
+const GOOGLE_CALENDAR_API_KEY = 'diwadev1214@gmail.com';
 
 
 app.get('/webhook',function(req,res){
@@ -102,61 +106,24 @@ app.post('/webhook', async function(req,res){
 
 })
 
- async function initalTemplate(option){
-    let url = option['url']
-    let from = option['from']
-    await axios.post(url,{
-        "messaging_product": "whatsapp",
-        "to":from,
-        "type":"template",
-        "template":{
-            "name":"welcome_message",
-            "language":{
-                "code":"en_US"
-            }
-        }
-    })
-    res.status(200).send("success")
-}
-
-async function confirmationTemplate(option){
-    let url = option['url']
-    let from = option['from']
-    await axios.post(url,{
-        "messaging_product": "whatsapp",
-        "to":from,
-        "type":"template",
-        "template":{
-            "name":"confirm_text",
-            "language":{
-                "code":"en_US"
-            }
-        }
-    })
-    res.status(200).send("success")
-}
-
-async function thanksTemplate(option){
-    let url = option['url']
-    let from = option['from']
-    await axios.post(url,{
-        "messaging_product": "whatsapp",
-        "to":from,
-        "type":"template",
-        "template":{
-            "name":"thanks_message",
-            "language":{
-                "code":"en_US"
-            }
-        }
-    })
-    res.status(200).send("success")
-}
 
 
 app.get("/",function(req,res){
     res.send("Whatsapp server")
 })
+
+app.post('/create_event', async function(req,res){
+
+    try {
+        let eventCreated = await auth.authorize().then(event.createEvent).catch(console.error);
+        return res.send(eventCreated)
+    } catch (error) {
+        console.error('Error creating Google Calendar event:', error);
+        res.status(500).send("Internal Server Error");
+    }
+})
+
+
 
 app.listen(process.env.PORT,()=>{
     console.log("Whatsapp server is running on port 5000")
