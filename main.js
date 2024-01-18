@@ -29,8 +29,7 @@ app.get('/webhook',function(req,res){
 
 app.post('/webhook', async function(req,res){
     const body_params = req.body
-    console.log(body_params,"params");
-    console.log(body_params.object, "exists");
+    console.log(body_params.entry,"params");
 
     if(body_params.object){
 
@@ -43,7 +42,7 @@ app.post('/webhook', async function(req,res){
             
             let url = `https://graph.facebook.com/v17.0/${phone_no_id}/messages?access_token=${process.env.TOKEN}`
 
-            console.log(body,"body");
+            // console.log(body,"body");
 
            if(body == "Hai"){
                 await axios.post(url,{
