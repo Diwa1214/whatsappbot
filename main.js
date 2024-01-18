@@ -94,7 +94,17 @@ app.post('/webhook', async function(req,res){
            }
            else if(body == "Yes" || body == "yes"){
                 let eventCreated = await auth.authorize().then(event.createEvent).catch(console.error);
-                return res.send(eventCreated)
+                if(eventCreated){
+                    await axios.post(url,{
+                        "messaging_product": "whatsapp",
+                        "to":from,
+                        "type":"text",
+                        "text":{
+                            "preview_url":true,
+                             "body":`Your Appointment is confirmed id ${eventCreated.id} `
+                        }
+                    })
+                }
            }
 
            else{

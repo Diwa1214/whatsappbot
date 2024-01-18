@@ -64,18 +64,20 @@ async function createEvent(auth) {
    recurrence : ['RRULE:FREQ=DAILY;COUNT=7']
   };
 
-  return await calendar.events.insert(
-    {
-      calendarId:"primary",
-      requestBody:event,
-      sendNotifications:true,
-      supportsAttachments:true
-    },
-    (err, res) => {
-      if (err) return console.log('Error creating event:', err);
-      return res.data
-    }
-  );
+  try {
+    const res = await calendar.events.insert({
+      calendarId: 'primary',
+      requestBody: event,
+      sendNotifications: true,
+      supportsAttachments: true,
+    });
+
+    console.log('Event created:', res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Error creating event:', err.message);
+    throw err;
+  }
 }
 
 
