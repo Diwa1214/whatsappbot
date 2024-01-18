@@ -41,10 +41,11 @@ app.post('/webhook', async function(req,res){
             let phone_no_id =  body_params.entry[0].changes[0].value.metadata.phone_number_id
             let from  = body_params.entry[0].changes[0].value.messages[0].from
             let body = ''
-            if(body_params.entry[0].changes[0].value.messages[0].type = "text"){
+            console.log(body_params.entry[0].changes[0].value.messages[0].type,"type");
+            if(body_params.entry[0].changes[0].value.messages[0].type == "text"){
                  body = body_params.entry[0].changes[0].value.messages[0].text.body
             }
-            else if(body_params.entry[0].changes[0].value.messages[0].type = "button"){
+            else if(body_params.entry[0].changes[0].value.messages[0].type == "button"){
                 body = body_params.entry[0].changes[0].value.messages[0].button.text
             }
 
