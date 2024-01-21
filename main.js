@@ -36,7 +36,7 @@ app.get('/webhook',function(req,res){
 
 app.post('/webhook', async function(req,res){
     const body_params = req.body
-    console.log(JSON.stringify(body_params.entry),"params");
+    console.log(JSON.stringify(body_params.entry),"body_params");
 
     if(body_params.object){
 
