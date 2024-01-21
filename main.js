@@ -1,9 +1,3 @@
-/*
- * Starter Project for WhatsApp Echo Bot Tutorial
- *
- * Remix this as the starting point for following the WhatsApp Echo Bot tutorial
- *
- */
 
 "use strict";
 
@@ -13,13 +7,45 @@
 const token = process.env.WHATSAPP_TOKEN;
 
 // Imports dependencies and set up http server
- const express = require("express"),
+const express = require("express"),
   body_parser = require("body-parser"),
   axios = require("axios").default,
-  app = express().use(body_parser.json()); // creates express http server
+  app = express().use(body_parser.json()),
+  event = require("./src/events"),
+  auth = require("./auth/auth")
 
-// Sets server port and logs message on success
-app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
+
+
+// Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
+// info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
+app.get("/webhook", (req, res) => {
+  /**
+   * UPDATE YOUR VERIFY TOKEN
+   *This will be the Verify Token value when you set up webhook
+   **/
+  const verify_token = process.env.VERIFY_TOKEN;
+
+  // Parse params from the webhook verification request
+  let mode = req.query["hub.mode"];
+  let token = req.query["hub.verify_token"];
+  let challenge = req.query["hub.challenge"];
+
+  // Check if a token and mode were sent
+  if (mode && token) {
+    // Check the mode and token sent are correct
+    if (mode === "subscribe" && token === verify_token) {
+      // Respond with 200 OK and challenge token from the request
+      console.log("WEBHOOK_VERIFIED");
+      res.status(200).send(challenge);
+    } else {
+      // Responds with '403 Forbidden' if verify tokens do not match
+      res.sendStatus(403);
+    }
+  }
+});
+
+
+
 
 // Accepts POST requests at /webhook endpoint
 app.post("/webhook", async (req, res) => {
@@ -42,94 +68,86 @@ app.post("/webhook", async (req, res) => {
         req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-      
-      // Step 1       
-      if(msg_body == "Hai"){
-              axios({
-                method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-                url:
-                  "https://graph.facebook.com/v12.0/" +
-                  phone_number_id +
-                  "/messages?access_token=" +
-                  token,
-                data: {
-                  messaging_product: "whatsapp",
-                  to: from,
-                   "type":"template",
-                    "template":{
-                        "name":"welcome_message",
-                        "language":{
-                            "code":"en"
-                        }
-                    }
-                },
-                headers: { "Content-Type": "application/json" },
-              });
-            res.sendStatus(200);
+      let  url  = "https://graph.facebook.com/v12.0/" + phone_number_id + "/messages?access_token=" + token
 
+      // Step 1
+      if (msg_body == "Hai") {
+        await axios({
+          method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+          url:url,
+          data: {
+            messaging_product: "whatsapp",
+            to: from,
+            type: "template",
+            template: {
+              name: "welcome_message",
+              language: {
+                code: "en",
+              },
+            },
+          },
+          headers: { "Content-Type": "application/json" },
+        });
+        res.sendStatus(200);
       }
-    // Step 2    
-       if(msg_body == "Can you book me a time today that is available?"){
-              axios({
-                method: "POST", // Required, HTTP method, a string, e.g. POST, GET
-                url:
-                  "https://graph.facebook.com/v12.0/" +
-                  phone_number_id +
-                  "/messages?access_token=" +
-                  token,
-                data: {
-                  messaging_product: "whatsapp",
-                  to: from,
-                   "type":"template",
-                    "template":{
-                        "name":"confirm_text",
-                        "language":{
-                            "code":"en"
-                        }
-                    }
-                },
-                headers: { "Content-Type": "application/json" },
-              });
+      // Step 2
+      if (msg_body == "Can you book me a time today that is available?") {
+        await axios({
+          method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+          url:url,
+          data: {
+            messaging_product: "whatsapp",
+            to: from,
+            type: "template",
+            template: {
+              name: "confirm_text",
+              language: {
+                code: "en",
+              },
+            },
+          },
+          headers: { "Content-Type": "application/json" },
+        });
+        res.sendStatus(200);
+      }
+      // Step 3
+      if(msg_body == 'Yes' || msg_body == 'yes'){
+        let eventCreated = await auth.authorize().then(event.createEvent).catch(console.error);
+        if(eventCreated){
+            await axios({
+              method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+              url:url,
+              data: {
+                messaging_product: "whatsapp",
+                to: from,
+                type: "text",
+                text:{
+                   body :`Your appointment has been booked. Thank you for using our service. ${eventCreated.id} `
+                }
+          
+              },
+              headers: { "Content-Type": "application/json" },
+            });
             res.sendStatus(200);
-
-      }      
+        }
+      }
       
     }
-
   } else {
     // Return a '404 Not Found' if event is not from a WhatsApp API
     res.sendStatus(404);
   }
 });
 
-// Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
-// info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests 
-app.get("/webhook", (req, res) => {
-  /**
-   * UPDATE YOUR VERIFY TOKEN
-   *This will be the Verify Token value when you set up webhook
-  **/
-  const verify_token = process.env.VERIFY_TOKEN;
 
-  // Parse params from the webhook verification request
-  let mode = req.query["hub.mode"];
-  let token = req.query["hub.verify_token"];
-  let challenge = req.query["hub.challenge"];
 
-  // Check if a token and mode were sent
-  if (mode && token) {
-    // Check the mode and token sent are correct
-    if (mode === "subscribe" && token === verify_token) {
-      // Respond with 200 OK and challenge token from the request
-      console.log("WEBHOOK_VERIFIED");
-      res.status(200).send(challenge);
-    } else {
-      // Responds with '403 Forbidden' if verify tokens do not match
-      res.sendStatus(403);
-    }
-  }
+
+// Sets server port and logs message on success
+app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
+
+
+
+
+app.get("/", function (req, res) {
+  res.send("Whatsapp server");
 });
-
-app.get("/",function(req,res){
-    res.send("Whatsapp server")
-})
