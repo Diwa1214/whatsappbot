@@ -22,7 +22,7 @@ const token = process.env.WHATSAPP_TOKEN;
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
 
 // Accepts POST requests at /webhook endpoint
-app.post("/webhook", (req, res) => {
+app.post("/webhook", async (req, res) => {
   // Parse the request body from the POST
   let body = req.body;
 
@@ -43,8 +43,8 @@ app.post("/webhook", (req, res) => {
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
       
-      if(body == "Hai"){
-          console.log('')
+      // Step 1       
+      if(msg_body == "Hai"){
               axios({
                 method: "POST", // Required, HTTP method, a string, e.g. POST, GET
                 url:
@@ -55,13 +55,45 @@ app.post("/webhook", (req, res) => {
                 data: {
                   messaging_product: "whatsapp",
                   to: from,
-                  text: { body: "Ack: " + msg_body },
+                   "type":"template",
+                    "template":{
+                        "name":"welcome_message",
+                        "language":{
+                            "code":"en"
+                        }
+                    }
                 },
                 headers: { "Content-Type": "application/json" },
               });
-                 res.sendStatus(200);
+            res.sendStatus(200);
 
       }
+    // Step 2    
+       if(msg_body == "Can you book me a time today that is available?"){
+              axios({
+                method: "POST", // Required, HTTP method, a string, e.g. POST, GET
+                url:
+                  "https://graph.facebook.com/v12.0/" +
+                  phone_number_id +
+                  "/messages?access_token=" +
+                  token,
+                data: {
+                  messaging_product: "whatsapp",
+                  to: from,
+                   "type":"template",
+                    "template":{
+                        "name":"confirm_text",
+                        "language":{
+                            "code":"en"
+                        }
+                    }
+                },
+                headers: { "Content-Type": "application/json" },
+              });
+            res.sendStatus(200);
+
+      }      
+      
     }
 
   } else {
